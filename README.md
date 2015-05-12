@@ -26,4 +26,4 @@ Grunt plugin for symdiff.
             }
         }
     });
-    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-symdiff');
