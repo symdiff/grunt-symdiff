@@ -48,6 +48,7 @@
     "gruntplugin"
   ],
   "dependencies": {
+    "log-symbols": "1.0.2",
     "symdiff": "0.0.2"
   }
 }
