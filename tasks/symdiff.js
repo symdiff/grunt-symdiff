@@ -9,6 +9,7 @@
 'use strict';
 
 var symdiff = require('symdiff');
+var symbols = require('log-symbols');
 
 function dedup(t, idx, arr) {
     return arr.lastIndexOf(t) === idx;
@@ -72,11 +73,24 @@ module.exports = function(grunt) {
 
         // calculate the result
         var diff = symdiff(cssClasses, tplClasses, options.ignore);
-        if (diff.css.length) {
-            grunt.fail.warn('Unused CSS classes: ' + diff.css.join(' ') + '\n');
-        }
-        if (diff.templates.length) {
-            grunt.fail.warn('Unused template classes: ' + diff.templates.join(' ') + '\n');
+
+        ['CSS', 'Templates'].forEach(function(type) {
+          var result = diff[type.toLowerCase()];
+
+          // `✔ Templates` in green
+          var string = [symbols.success, type ['green']];
+
+          if (result.length) {
+            // TODO: add better formatting and separation of class names, currently just a long comma-separated list
+            // `✖ CSS slider-slides, ...` in red
+            string = [symbols.error, type ['red'], result.join(' ')];
+          }
+
+          grunt.log.writeln.apply(this, string);
+        });
+
+        if (diff.css.length || diff.templates.length) {
+          grunt.fail.warn('symdiff encountered unused classes', '\n');
         }
     });
 
