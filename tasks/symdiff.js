@@ -75,22 +75,22 @@ module.exports = function(grunt) {
         var diff = symdiff(cssClasses, tplClasses, options.ignore);
 
         ['CSS', 'Templates'].forEach(function(type) {
-          var result = diff[type.toLowerCase()];
+            var result = diff[type.toLowerCase()];
 
-          // `✔ Templates` in green
-          var string = [symbols.success, type ['green']];
+            // `✔ Templates` in green
+            var string = [symbols.success, type ['green']];
 
-          if (result.length) {
-            // TODO: add better formatting and separation of class names, currently just a long comma-separated list
-            // `✖ CSS slider-slides, ...` in red
-            string = [symbols.error, type ['red'], result.join(' ')];
-          }
+            if (result.length) {
+                // TODO: add better formatting and separation of class names, currently just a long comma-separated list
+                // `✖ CSS slider-slides, ...` in red
+                string = [symbols.error, type ['red'], result.join(' ')];
+            }
 
-          grunt.log.writeln.apply(this, string);
+            grunt.log.writeln.apply(this, string);
         });
 
         if (diff.css.length || diff.templates.length) {
-          grunt.fail.warn('symdiff encountered unused classes', '\n');
+            grunt.fail.warn('symdiff encountered unused classes', '\n');
         }
     });
 
