@@ -81,10 +81,14 @@ module.exports = function (grunt) {
                         'Please report this in github.com/symdiff/grunt-symdiff:\n' ['yellow'],
                         'Ambiguous file ' + file[0] + '\n',
                         'Classes found: ' + classes.join(' ') + '\n',
-                        'CSS plugins: ' + options.css.map(function(fn) { return fn.name; }) + '\n',
-                        'Template plugins: ' + options.templates.map(function(fn) { return fn.name; }) + '\n',
-                        'Source:\n' + s
-                    ]);
+                        'CSS plugins: ' + options.css.map(function (fn) {
+                            return fn.name;
+                        }) + '\n',
+                        'Template plugins: ' + options.templates.map(function (fn) {
+                            return fn.name;
+                        }) + '\n',
+                                               'Source:\n' + s
+                                           ]);
                 }
                 if (css.length) {
                     Array.prototype.push.apply(
