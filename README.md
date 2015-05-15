@@ -5,6 +5,8 @@
 
 Grunt plugin for symdiff.
 
+![grunt-symdiff](grunt-symdiff.png)
+
 ## Installation
 
     npm install grunt-symdiff
