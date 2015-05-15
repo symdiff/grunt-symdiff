@@ -51,31 +51,51 @@ module.exports = function (grunt) {
                             // Read file source.
                             return [filepath, grunt.file.read(filepath)];
                         });
+
             src.forEach(function (file) {
                 var s = file[1],
-                    classes = options.css
+                    css = options
+                                .css
                                 .map(function (plugin) {
                                     return plugin(s);
                                 })
                                 .reduce(flatten, [])
-                                .filter(dedup);
-                classesPerFile[file[0]] = classes;
-                Array.prototype.push.apply(
-                    cssClasses,
-                    classes);
-            });
-            src.forEach(function (file) {
-                var s = file[1],
-                    classes = options.templates
+                                .filter(dedup),
+                    tpl = options
+                                .templates
                                 .map(function (plugin) {
                                     return plugin(s);
                                 })
                                 .reduce(flatten, [])
-                                .filter(dedup);
+                                .filter(dedup),
+                    classes = css.concat(tpl);
+    
                 classesPerFile[file[0]] = classes;
-                Array.prototype.push.apply(
-                    tplClasses,
-                    classes);
+
+                // it should really not happen that both css and template plugins
+                // find classes _in the same file_ because usually a file isn't
+                // both at the same time
+                if (css.length && tpl.length) {
+                    grunt.log.writeln.apply(this, [
+                        symbols.warning,
+                        'Please report this in github.com/symdiff/grunt-symdiff:\n' ['yellow'],
+                        'Ambiguous file ' + file[0] + '\n',
+                        'Classes found: ' + classes.join(' ') + '\n',
+                        'CSS plugins: ' + options.css.map(function(fn) { return fn.name; }) + '\n',
+                        'Template plugins: ' + options.templates.map(function(fn) { return fn.name; }) + '\n',
+                        'Source:\n' + s
+                    ]);
+                }
+                if (css.length) {
+                    Array.prototype.push.apply(
+                        cssClasses,
+                        classes);
+                }
+                if (tpl.length) {
+                    Array.prototype.push.apply(
+                        tplClasses,
+                        classes);   
+                }
             });
         });
         // calculate the result
@@ -83,11 +103,13 @@ module.exports = function (grunt) {
             joinedDiff = diff.css.concat(diff.templates),
             outputLines = [];
 
+
         Object
         .keys(classesPerFile)
         .forEach(function (filename) {
             var classes = classesPerFile[filename],
                 perFileDiff = _.intersection(classes, joinedDiff);
+            
             if (perFileDiff.length) {
                 outputLines.push([
                     symbols.error,
