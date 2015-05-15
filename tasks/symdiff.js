@@ -10,7 +10,19 @@
 
 var symdiff = require('symdiff'),
     _ = require('lodash'),
-    symbols = require('log-symbols');
+    symbols = require('log-symbols'),
+    path = require('path'),
+    extensions = [
+        {name: 'html', type: 'templates'},
+        {name: 'hbs', type: 'templates'},
+        {name: 'jade', type: 'templates'},
+        {name: 'jsx', type: 'templates'},
+        {name: 'css', type: 'css'},
+        {name: 'sass', type: 'css'},
+        {name: 'scss', type: 'css'},
+        {name: 'less', type: 'css'},
+        {name: 'styl', type: 'css'}
+    ];
 
 function dedup(t, idx, arr) {
     return arr.lastIndexOf(t) === idx;
@@ -20,6 +32,7 @@ function flatten(prev, cur) {
     Array.prototype.push.apply(prev, cur);
     return prev;
 }
+
 
 module.exports = function (grunt) {
     grunt.registerMultiTask('symdiff', 'Grunt plugin for symdiff', function () {
@@ -52,29 +65,20 @@ module.exports = function (grunt) {
                             return [filepath, grunt.file.read(filepath)];
                         });
             src.forEach(function (file) {
-                var s = file[1],
-                    classes = options.css
+                var fileType = _.result(_.find(extensions, function (ext) {
+                        return ext.name === (path.extname(file[0])).split('.')[1];
+                    }), 'type'),
+                    s = file[1],
+                    classes = options[fileType]
                                 .map(function (plugin) {
                                     return plugin(s);
                                 })
                                 .reduce(flatten, [])
                                 .filter(dedup);
+
                 classesPerFile[file[0]] = classes;
                 Array.prototype.push.apply(
-                    cssClasses,
-                    classes);
-            });
-            src.forEach(function (file) {
-                var s = file[1],
-                    classes = options.templates
-                                .map(function (plugin) {
-                                    return plugin(s);
-                                })
-                                .reduce(flatten, [])
-                                .filter(dedup);
-                classesPerFile[file[0]] = classes;
-                Array.prototype.push.apply(
-                    tplClasses,
+                    (fileType === 'templates' ? tplClasses : cssClasses),
                     classes);
             });
         });
@@ -88,12 +92,14 @@ module.exports = function (grunt) {
         .forEach(function (filename) {
             var classes = classesPerFile[filename],
                 perFileDiff = _.intersection(classes, joinedDiff);
+
             if (perFileDiff.length) {
                 outputLines.push([
                     symbols.error,
                     filename ['red'],
                     'contains unused classes:',
-                    perFileDiff.join(' ') ['blue']]);
+                    perFileDiff.join(' ') ['blue']
+                ]);
             }
         });
 
