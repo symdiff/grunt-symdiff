@@ -1,7 +1,7 @@
 {
   "name": "grunt-symdiff",
   "description": "Grunt plugin for symdiff",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage": "https://github.com/symdiff/grunt-symdiff",
   "author": {
     "name": "Nikolaus Piccolotto",

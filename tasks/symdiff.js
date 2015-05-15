@@ -119,7 +119,7 @@ module.exports = function (grunt) {
                     symbols.error,
                     filename ['red'],
                     'contains unused classes:',
-                    perFileDiff.join(' ') ['blue']]);
+                    perFileDiff.join(', ') ['blue']]);
             }
         });
 
