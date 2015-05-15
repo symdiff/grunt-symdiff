@@ -8,8 +8,8 @@
 
 'use strict';
 
-var symdiff = require('symdiff');
-var symbols = require('log-symbols');
+var symdiff = require('symdiff'),
+    symbols = require('log-symbols');
 
 function dedup(t, idx, arr) {
     return arr.lastIndexOf(t) === idx;
@@ -20,8 +20,8 @@ function flatten(prev, cur) {
     return prev;
 }
 
-module.exports = function(grunt) {
-    grunt.registerMultiTask('symdiff', 'Grunt plugin for symdiff', function() {
+module.exports = function (grunt) {
+    grunt.registerMultiTask('symdiff', 'Grunt plugin for symdiff', function () {
         // Merge task-specific and/or target-specific options with these defaults.
         var options = this.options({
                 css: [],
@@ -34,9 +34,9 @@ module.exports = function(grunt) {
         // Iterate over all specified file groups.
         this
         .files
-        .forEach(function(f) {
-            var src =  f.src
-                        .filter(function(filepath) {
+        .forEach(function (f) {
+            var src = f.src
+                        .filter(function (filepath) {
                             // Warn on and remove invalid source files (if nonull was set).
                             if (!grunt.file.exists(filepath)) {
                                 grunt.log.warn('Source file "' + filepath + '" not found.');
@@ -45,21 +45,21 @@ module.exports = function(grunt) {
                                 return true;
                             }
                         })
-                        .map(function(filepath) {
+                        .map(function (filepath) {
                             // Read file source.
                             return grunt.file.read(filepath);
                         });
-            src.forEach(function(s) {
+            src.forEach(function (s) {
                 Array.prototype.push.apply(
                     cssClasses,
-                    options.css.map(function(plugin) {
+                    options.css.map(function (plugin) {
                         return plugin(s);
                     }));
             });
-            src.forEach(function(s) {
+            src.forEach(function (s) {
                 Array.prototype.push.apply(
                     tplClasses,
-                    options.templates.map(function(plugin) {
+                    options.templates.map(function (plugin) {
                         return plugin(s);
                     }));
             });
@@ -74,11 +74,10 @@ module.exports = function(grunt) {
         // calculate the result
         var diff = symdiff(cssClasses, tplClasses, options.ignore);
 
-        ['CSS', 'Templates'].forEach(function(type) {
-            var result = diff[type.toLowerCase()];
-
-            // `✔ Templates` in green
-            var string = [symbols.success, type ['green']];
+        ['CSS', 'Templates'].forEach(function (type) {
+            var result = diff[type.toLowerCase()],
+                // `✔ Templates` in green
+                string = [symbols.success, type ['green']];
 
             if (result.length) {
                 // TODO: add better formatting and separation of class names, currently just a long comma-separated list

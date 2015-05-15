@@ -11,7 +11,7 @@
 var symdiffCSS = require('symdiff-css'),
     symdiffHTML = require('symdiff-html');
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
     // Project configuration.
     grunt.initConfig({
@@ -44,7 +44,8 @@ module.exports = function(grunt) {
         jscs: {
             src: ['*.js', 'tasks/*.js', 'test/*.js'],
             options: {
-                config: '.jscsrc'
+                config: '.jscsrc',
+                fix: true
             }
         }
     });
