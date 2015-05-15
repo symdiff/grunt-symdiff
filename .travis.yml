@@ -3,6 +3,6 @@ node_js:
   - '0.10'
   - '0.12'
   - 'iojs'
-script: "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage && grunt"
+script: "mocha -R spec && grunt"
 notifications:
   email: false
