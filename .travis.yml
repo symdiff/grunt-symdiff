@@ -3,6 +3,8 @@ node_js:
   - '0.10'
   - '0.12'
   - 'iojs'
+before_script:
+  - npm install grunt-cli -g
 script: "mocha -R spec && grunt"
 notifications:
   email: false
