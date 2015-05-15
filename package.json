@@ -1,7 +1,7 @@
 {
   "name": "grunt-symdiff",
   "description": "Grunt plugin for symdiff",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "https://github.com/symdiff/grunt-symdiff",
   "author": {
     "name": "Nikolaus Piccolotto",
@@ -25,7 +25,7 @@
     }
   ],
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 0.10.0"
   },
   "scripts": {
     "test": "mocha && grunt"
@@ -49,6 +49,7 @@
     "gruntplugin"
   ],
   "dependencies": {
+    "lodash": "3.8.0",
     "log-symbols": "1.0.2",
     "symdiff": "0.0.2"
   }

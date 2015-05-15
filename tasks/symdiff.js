@@ -9,6 +9,7 @@
 'use strict';
 
 var symdiff = require('symdiff'),
+    _ = require('lodash'),
     symbols = require('log-symbols');
 
 function dedup(t, idx, arr) {
@@ -28,6 +29,7 @@ module.exports = function (grunt) {
                 templates: [],
                 ignore: []
             }),
+            classesPerFile = {},
             cssClasses = [],
             tplClasses = [];
 
@@ -47,50 +49,63 @@ module.exports = function (grunt) {
                         })
                         .map(function (filepath) {
                             // Read file source.
-                            return grunt.file.read(filepath);
+                            return [filepath, grunt.file.read(filepath)];
                         });
-            src.forEach(function (s) {
+            src.forEach(function (file) {
+                var s = file[1],
+                    classes = options.css
+                                .map(function (plugin) {
+                                    return plugin(s);
+                                })
+                                .reduce(flatten, [])
+                                .filter(dedup);
+                classesPerFile[file[0]] = classes;
                 Array.prototype.push.apply(
                     cssClasses,
-                    options.css.map(function (plugin) {
-                        return plugin(s);
-                    }));
+                    classes);
             });
-            src.forEach(function (s) {
+            src.forEach(function (file) {
+                var s = file[1],
+                    classes = options.templates
+                                .map(function (plugin) {
+                                    return plugin(s);
+                                })
+                                .reduce(flatten, [])
+                                .filter(dedup);
+                classesPerFile[file[0]] = classes;
                 Array.prototype.push.apply(
                     tplClasses,
-                    options.templates.map(function (plugin) {
-                        return plugin(s);
-                    }));
+                    classes);
             });
         });
-        cssClasses = cssClasses
-                        .reduce(flatten, [])
-                        .filter(dedup);
-        tplClasses = tplClasses
-                        .reduce(flatten, [])
-                        .filter(dedup);
-
         // calculate the result
-        var diff = symdiff(cssClasses, tplClasses, options.ignore);
+        var diff = symdiff(cssClasses, tplClasses, options.ignore),
+            joinedDiff = diff.css.concat(diff.templates),
+            outputLines = [];
 
-        ['CSS', 'Templates'].forEach(function (type) {
-            var result = diff[type.toLowerCase()],
-                // `✔ Templates` in green
-                string = [symbols.success, type ['green']];
-
-            if (result.length) {
-                // TODO: add better formatting and separation of class names, currently just a long comma-separated list
-                // `✖ CSS slider-slides, ...` in red
-                string = [symbols.error, type ['red'], result.join(' ')];
+        Object
+        .keys(classesPerFile)
+        .forEach(function (filename) {
+            var classes = classesPerFile[filename],
+                perFileDiff = _.intersection(classes, joinedDiff);
+            if (perFileDiff.length) {
+                outputLines.push([
+                    symbols.error,
+                    filename ['red'],
+                    'contains unused classes:',
+                    perFileDiff.join(' ') ['blue']]);
             }
+        });
 
-            grunt.log.writeln.apply(this, string);
+        outputLines
+        .forEach(function (line) {
+            grunt.log.writeln.apply(this, line);
         });
 
         if (diff.css.length || diff.templates.length) {
             grunt.fail.warn('symdiff encountered unused classes', '\n');
         }
+
     });
 
 };
