@@ -67,12 +67,12 @@ module.exports = function (grunt) {
                                 }),
                     cssWarnings = css
                                     .map(function(result) {
-                                        return result._warnings || [];
+                                        return result.warnings || [];
                                     })
                                     .reduce(flatten, []),
                     tplWarnings = tpl
                                     .map(function(result) {
-                                        return result._warnings || [];
+                                        return result.warnings || [];
                                     })
                                     .reduce(flatten, []);
 
