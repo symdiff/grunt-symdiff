@@ -30,6 +30,7 @@ module.exports = function (grunt) {
                 ignore: []
             }),
             classesPerFile = {},
+            warningsPerFile = {},
             cssClasses = [],
             tplClasses = [];
 
@@ -58,18 +59,33 @@ module.exports = function (grunt) {
                                 .css
                                 .map(function (plugin) {
                                     return plugin(s);
-                                })
-                                .reduce(flatten, [])
-                                .filter(dedup),
+                                }),
                     tpl = options
                                 .templates
                                 .map(function (plugin) {
                                     return plugin(s);
-                                })
-                                .reduce(flatten, [])
-                                .filter(dedup),
-                    classes = css.concat(tpl);
-    
+                                }),
+                    cssWarnings = css
+                                    .map(function(result) {
+                                        return result.warnings || [];
+                                    })
+                                    .reduce(flatten, []),
+                    tplWarnings = tpl
+                                    .map(function(result) {
+                                        return result.warnings || [];
+                                    })
+                                    .reduce(flatten, []);
+
+                warningsPerFile[file[0]] = cssWarnings.concat(tplWarnings);
+
+                css = css
+                        .reduce(flatten, [])
+                        .filter(dedup);
+                tpl = tpl
+                        .reduce(flatten, [])
+                        .filter(dedup);
+                var classes = css.concat(tpl);
+
                 classesPerFile[file[0]] = classes;
 
                 // it should really not happen that both css and template plugins
@@ -87,8 +103,8 @@ module.exports = function (grunt) {
                         'Template plugins: ' + options.templates.map(function (fn) {
                             return fn.name;
                         }) + '\n',
-                                               'Source:\n' + s
-                                           ]);
+                       'Source:\n' + s
+                   ]);
                 }
                 if (css.length) {
                     Array.prototype.push.apply(
@@ -98,7 +114,7 @@ module.exports = function (grunt) {
                 if (tpl.length) {
                     Array.prototype.push.apply(
                         tplClasses,
-                        classes);   
+                        classes);
                 }
             });
         });
@@ -107,13 +123,25 @@ module.exports = function (grunt) {
             joinedDiff = diff.css.concat(diff.templates),
             outputLines = [];
 
+        Object
+        .keys(warningsPerFile)
+        .forEach(function (filename) {
+            warningsPerFile[filename]
+            .forEach(function(warning) {
+                outputLines.push([
+                    symbols.warning,
+                    filename ['yellow'],
+                    warning ['yellow']
+                ]);
+            });
+        });
 
         Object
         .keys(classesPerFile)
         .forEach(function (filename) {
             var classes = classesPerFile[filename],
                 perFileDiff = _.intersection(classes, joinedDiff);
-            
+
             if (perFileDiff.length) {
                 outputLines.push([
                     symbols.error,
